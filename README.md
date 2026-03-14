@@ -1,3 +1,4 @@
+
 # orchard-eye
 
 > Drone imagery → damaged apple detection → spatial treatment zones
@@ -300,3 +301,37 @@ Additional opportunities include integrating predictions with **automated sprayi
 Finally, running the pipeline on **multi-temporal drone imagery** could allow the system to track how disease clusters evolve over time, enabling earlier intervention and better monitoring of treatment effectiveness.
 
 These directions would move the system closer to a full **decision-support tool for precision agriculture**, where aerial imagery is not only analyzed but directly informs field-level management decisions.
+
+---
+
+# Repository Structure
+
+```
+orchard-eye
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+│
+├── assets/images        # visuals used in the README
+├── scripts              # Python logic used inside Roboflow workflow blocks
+├── data                 # dataset documentation
+└── outputs              # generated pipeline outputs
+```
+
+This structure separates **documentation assets, workflow logic, and generated outputs** to keep the repository organized and reproducible.
+
+---
+
+# Dataset
+
+This project does not include a local dataset.
+
+The object detection model was built using an **Apple Detection dataset available on Roboflow Universe**.
+
+Dataset:
+https://universe.roboflow.com/roboflow-100/apples-fvpl5
+
+The dataset was accessed directly through the Roboflow platform during training and inference inside the workflow.
+
+Because the dataset is hosted on Roboflow Universe, it is not stored in this repository.
