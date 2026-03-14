@@ -5,6 +5,8 @@
 
 **Built with:** Roboflow Workflows · Computer Vision · Precision Agriculture
 
+🔗 **[cags-workspace/elma](https://app.roboflow.com/cags-workspace/workflows/edit/elma)**
+
 A computer vision pipeline that converts **drone imagery of apple orchards into localized treatment zones**.
 
 Instead of simply detecting fruit, the system analyzes **spatial clusters of damaged apples** to estimate where intervention is actually needed.
