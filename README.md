@@ -4,10 +4,6 @@
 
 Rebuilding a computer vision agriculture pipeline using Roboflow Workflows to estimate targeted treatment zones in apple orchards.
 
-**this is a demo.**
-
-# Precision Orchard Vision
-
 Fruit diseases spread locally. Most farms spray entire fields anyway.
 
 This pipeline detects apple health from drone imagery and estimates which clusters actually need treatment — built with Roboflow Workflows, originally developed as my graduation project.
