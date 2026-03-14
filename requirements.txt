@@ -1,0 +1,6 @@
+roboflow
+opencv-python
+numpy
+matplotlib
+supervision
+python-dotenv
