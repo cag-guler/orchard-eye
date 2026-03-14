@@ -1,7 +1,8 @@
-
 # orchard-eye
 
-> **Drone imagery → damaged apple detection → spatial treatment zones**
+> Drone imagery → damaged apple detection → spatial treatment zones
+
+**Built with:** Roboflow Workflows · Computer Vision · Precision Agriculture
 
 A computer vision pipeline that converts **drone imagery of apple orchards into localized treatment zones**.
 
@@ -11,7 +12,7 @@ This project rebuilds part of my **Control and Automation Engineering graduation
 
 ---
 
-# 🚀 Quick Overview
+# Quick Overview
 
 The pipeline converts raw drone imagery into **decision-oriented signals for orchard management**.
 
@@ -37,7 +38,7 @@ The final output highlights **areas where disease signals cluster**, enabling **
 
 ---
 
-# 🌱 The Problem
+# The Problem
 
 Fruit diseases rarely spread uniformly across orchards.
 
@@ -65,7 +66,7 @@ spray these zones
 
 ---
 
-# 🤖 Model
+# Model
 
 Custom object detection model trained using **Roboflow**.
 
@@ -80,7 +81,7 @@ In real agricultural deployments, disease detection often focuses on **leaf path
 
 ---
 
-# 🔎 Detection Output
+# Detection Output
 
 The model detects apples and damaged apples across aerial orchard imagery.
 
@@ -90,7 +91,7 @@ These detections form the **base signals used for clustering and treatment zone 
 
 ---
 
-# 📍 Spatial Cluster Analysis
+# Spatial Cluster Analysis
 
 Object detection alone does **not answer the operational question:**
 
@@ -102,18 +103,18 @@ The pipeline therefore performs **spatial clustering on bounding box coordinates
 
 ### Clustering Process
 
-1️⃣ **Detection Stitching**  
-Predictions from sliced inference are mapped back into the original image coordinate space.
+1. **Detection Stitching**  
+   Predictions from sliced inference are mapped back into the original image coordinate space.
 
-2️⃣ **Spatial Proximity Analysis**  
-Bounding box centers are compared using **Euclidean distance**.
+2. **Spatial Proximity Analysis**  
+   Bounding box centers are compared using **Euclidean distance**.
 
-3️⃣ **Cluster Formation**  
-Nearby detections are merged into **treatment zones**.
+3. **Cluster Formation**  
+   Nearby detections are merged into **treatment zones**.
 
 ---
 
-# 📊 Merge Threshold Comparison
+# Merge Threshold Comparison
 
 Different clustering thresholds were evaluated to understand how spatial grouping affects treatment zone estimation.
 
@@ -135,7 +136,7 @@ Different clustering thresholds were evaluated to understand how spatial groupin
 
 ---
 
-# ✅ Optimal Treatment Zones
+# Optimal Treatment Zones
 
 A merge threshold of **120 pixels** produced the most interpretable treatment regions.
 
@@ -152,7 +153,7 @@ These zones represent areas **most likely to require intervention**.
 
 ---
 
-# 🔥 Disease Density Heatmap
+# Disease Density Heatmap
 
 In addition to clustering, the pipeline generates a **spatial heatmap** showing where damaged apple detections accumulate.
 
@@ -162,7 +163,7 @@ This visualization highlights **disease intensity across the orchard**.
 
 ---
 
-# 📈 Quantitative Signals
+# Quantitative Signals
 
 Beyond visual outputs, the workflow extracts simple quantitative indicators describing orchard health.
 
@@ -198,7 +199,7 @@ Together these signals transform raw detections into **decision-oriented indicat
 
 ---
 
-# ⚙️ Roboflow Workflow Architecture
+# Roboflow Workflow Architecture
 
 ![Workflow](assets/images/workflow-diagram.png)
 
@@ -215,7 +216,7 @@ The workflow produces both **visual outputs** and **structured signals** describ
 
 ---
 
-# 🎓 Background
+# Background
 
 This project originated as my **Control and Automation Engineering graduation thesis** focused on **precision agriculture systems**.
 
@@ -236,8 +237,48 @@ Most development time was spent on:
 - large-image inference orchestration
 - model infrastructure
 
-Rather than focusing on the **actual decision logic**.
+rather than focusing on the **actual decision logic**.
 
 This repository rebuilds the **vision layer using Roboflow Workflows** to evaluate how modern tooling reduces that overhead and allows development effort to focus on:
 
 > **turning model outputs into actionable agricultural decisions**
+
+---
+
+# What This Project Demonstrates
+
+This project explores how modern developer tooling can reduce the engineering overhead traditionally required to build computer vision systems.
+
+In the original thesis implementation, a large portion of the effort went into building infrastructure before any meaningful inference could run. Dataset preparation pipelines, training configuration, large-image slicing, prediction stitching, and orchestration all had to be engineered manually.
+
+Rebuilding the vision layer using **Roboflow Workflows** significantly simplified that process. Core components such as dataset management, model training, and large-image inference could be assembled much faster, allowing development time to shift away from infrastructure and toward **interpreting model outputs and designing decision logic**.
+
+As a result, the pipeline focuses less on producing raw detections and more on generating **decision-oriented signals**. Instead of simply identifying objects, the system analyzes spatial patterns in the detections and converts them into interpretable treatment zones.
+
+The goal is to move from a model that answers:
+
+```
+What objects are present?
+```
+
+to a system that helps answer the operational question:
+
+```
+Where should intervention happen?
+```
+
+---
+
+# Future Work
+
+Several extensions could make this system more applicable to real-world agricultural deployments.
+
+One direction would be shifting from fruit-level detection to **leaf-level disease detection**, which typically provides stronger biological signals for identifying early-stage crop health issues.
+
+Another improvement would involve translating clustered detections into **grid-based field recommendations**. Precision agriculture systems often operate on spatial grids rather than irregular clusters, enabling easier integration with field machinery and treatment planning.
+
+Additional opportunities include integrating predictions with **automated spraying or irrigation systems**, allowing treatment decisions to be executed directly from the model outputs.
+
+Finally, running the pipeline on **multi-temporal drone imagery** could allow the system to track how disease clusters evolve over time, enabling earlier intervention and better monitoring of treatment effectiveness.
+
+These directions would move the system closer to a full **decision-support tool for precision agriculture**, where aerial imagery is not only analyzed but directly informs field-level management decisions.
