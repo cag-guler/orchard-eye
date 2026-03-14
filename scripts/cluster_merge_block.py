@@ -1,5 +1,5 @@
 """
-Roboflow Workflow Python Block 3
+Roboflow Workflow Python Block 2
 
 Block Name: Merge Close Detections By Class
 Block Description: Merges nearby 'apple' and 'damaged_apple' detections of the same class by IoU and distance threshold. Set iou_threshold and distance_threshold to control merging sensitivity.
