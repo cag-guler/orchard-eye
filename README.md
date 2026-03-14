@@ -223,15 +223,15 @@ The Python logic used in those blocks is included in the `scripts/` directory fo
 
 # Development Notes
 
-During development I initially attempted to train a custom model using my own dataset.
+Building a custom dataset was the first approach. Using my own orchard imagery, I began labeling and training a detection model from scratch.
 
-However, dataset iteration proved difficult within the available plan constraints. Once a model was trained, modifying the dataset or extending the training set required restarting the process rather than incrementally updating the model.
+The free plan introduced constraints that compounded quickly. Dataset updates required **restarting the training process entirely** rather than extending an existing model. If a model developed incorrect patterns during training, there was no path to correct it incrementally — only a full rebuild. Upload limits further restricted how fast the dataset could grow.
 
-To avoid repeatedly retraining small models and to work with a more robust dataset, I explored the **Roboflow Universe** ecosystem and selected an existing **Apple Detection dataset**. This allowed the project to focus on the **spatial reasoning layer of the pipeline** rather than dataset infrastructure.
+For a pipeline where the core problem is **spatial reasoning and treatment zone estimation** — not raw model performance — these constraints became the limiting factor before meaningful pipeline work could begin.
 
-One of the most noticeable advantages of Roboflow was the speed at which a complete computer vision pipeline could be assembled. Tasks that previously required significant engineering effort in my thesis—dataset preparation, training configuration, and large-image inference orchestration—could be replicated much faster using the workflow system.
+The solution was **Roboflow Universe**. Switching to an existing Apple Detection dataset removed the dataset infrastructure bottleneck entirely and allowed development effort to shift toward what the project is actually about: slicing high-resolution aerial imagery, stitching detections across slices, clustering spatial signals, and converting model outputs into localized treatment zones.
 
-At the same time, several parts of the system still required custom logic through Python blocks, particularly for spatial clustering and area calculations. This reflects a common pattern in real-world computer vision systems: while tooling simplifies model training and inference, **domain-specific reasoning layers often remain custom-built.**
+This also reflects a broader point about Roboflow Universe as an ecosystem: for applied computer vision projects where domain data is scarce or expensive to collect, the availability of pre-labeled datasets is a **meaningful accelerant**. The dataset bottleneck — historically one of the most time-consuming parts of building vision systems — can often be bypassed entirely.
 
 ---
 
@@ -288,6 +288,33 @@ Where should intervention happen?
 
 ---
 
+## Observed Limitations
+
+These are friction points encountered during development — not complaints, 
+but honest observations from building on top of the platform.
+
+**Slice stitching is opaque.**  
+When detections from adjacent slices conflict at boundaries, the stitching 
+behavior is difficult to inspect or adjust. There is no visibility into 
+intermediate outputs at this stage, which made debugging significantly 
+slower than expected.
+
+**Python block execution environment is restrictive.**  
+Custom Python blocks are the right mechanism for logic that doesn't fit 
+the visual workflow — but dependency support is limited, error messages 
+are often unclear, and publishing failures occur when runtime errors exist 
+without surfacing exactly where. Better runtime feedback here would 
+meaningfully improve iteration speed.
+
+**Grid-based output requires leaving the platform.**  
+Precision agriculture systems operate on spatial field grids, not irregular 
+polygons. Translating clustered detections into grid coordinates required 
+custom logic built entirely outside the Workflow environment. For 
+agriculture-focused deployments specifically, native grid output support 
+would close a meaningful gap.
+
+---
+
 # Future Work
 
 Several extensions could make this system more applicable to real-world agricultural deployments.
@@ -303,6 +330,24 @@ Finally, running the pipeline on **multi-temporal drone imagery** could allow th
 These directions would move the system closer to a full **decision-support tool for precision agriculture**, where aerial imagery is not only analyzed but directly informs field-level management decisions.
 
 ---
+
+
+# Dataset
+
+This project does not include a local dataset.
+
+The object detection model was built using an **Apple Detection dataset available on Roboflow Universe**.
+
+Dataset:
+https://universe.roboflow.com/roboflow-100/apples-fvpl5
+
+The dataset was accessed directly through the Roboflow platform during training and inference inside the workflow.
+
+Because the dataset is hosted on Roboflow Universe, it is not stored in this repository.
+
+
+---
+
 
 # Repository Structure
 
@@ -323,15 +368,24 @@ This structure separates **documentation assets, workflow logic, and generated o
 
 ---
 
-# Dataset
+## Closing
 
-This project does not include a local dataset.
+This project started as a question: how much of the engineering overhead 
+from my thesis could modern tooling eliminate?
 
-The object detection model was built using an **Apple Detection dataset available on Roboflow Universe**.
+The answer is: most of it.
 
-Dataset:
-https://universe.roboflow.com/roboflow-100/apples-fvpl5
+Dataset management, model training, and inference orchestration — the parts 
+that consumed the majority of development time in the original system — are 
+no longer the hard parts. Roboflow moves the engineering effort forward, 
+closer to the actual problem.
 
-The dataset was accessed directly through the Roboflow platform during training and inference inside the workflow.
+The hard parts that remain are not platform problems. They are engineering 
+problems: multi-parameter optimization, decision modeling across competing 
+signals, translating spatial detections into actionable field recommendations. 
+In the original thesis, these were addressed through Genetic Algorithm and 
+Big Bang–Big Crunch optimization across water ratio, maturity, and disease 
+variables simultaneously. That layer sits outside what any vision platform 
+provides — and outside what this demo attempts.
 
-Because the dataset is hosted on Roboflow Universe, it is not stored in this repository.
+This pipeline is a demo. But the thinking behind it isn't.
