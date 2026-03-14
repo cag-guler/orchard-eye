@@ -214,6 +214,10 @@ Key stages include:
 
 The workflow produces both **visual outputs** and **structured signals** describing orchard conditions.
 
+Some parts of the pipeline are implemented using **custom Python blocks inside Roboflow Workflows**.
+
+The Python logic used in those blocks is included in the `scripts/` directory for reference.
+
 ---
 
 # Development Notes
