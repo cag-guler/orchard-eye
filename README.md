@@ -216,6 +216,20 @@ The workflow produces both **visual outputs** and **structured signals** describ
 
 ---
 
+# Development Notes
+
+During development I initially attempted to train a custom model using my own dataset.
+
+However, dataset iteration proved difficult within the available plan constraints. Once a model was trained, modifying the dataset or extending the training set required restarting the process rather than incrementally updating the model.
+
+To avoid repeatedly retraining small models and to work with a more robust dataset, I explored the **Roboflow Universe** ecosystem and selected an existing **Apple Detection dataset**. This allowed the project to focus on the **spatial reasoning layer of the pipeline** rather than dataset infrastructure.
+
+One of the most noticeable advantages of Roboflow was the speed at which a complete computer vision pipeline could be assembled. Tasks that previously required significant engineering effort in my thesis—dataset preparation, training configuration, and large-image inference orchestration—could be replicated much faster using the workflow system.
+
+At the same time, several parts of the system still required custom logic through Python blocks, particularly for spatial clustering and area calculations. This reflects a common pattern in real-world computer vision systems: while tooling simplifies model training and inference, **domain-specific reasoning layers often remain custom-built.**
+
+---
+
 # Background
 
 This project originated as my **Control and Automation Engineering graduation thesis** focused on **precision agriculture systems**.
