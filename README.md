@@ -1,168 +1,243 @@
+
 # orchard-eye
 
-> Drone footage goes in. Treatment zones come out.
+> **Drone imagery → damaged apple detection → spatial treatment zones**
 
-Rebuilding a computer vision agriculture pipeline using Roboflow Workflows to estimate targeted treatment zones in apple orchards.
+A computer vision pipeline that converts **drone imagery of apple orchards into localized treatment zones**.
 
-Fruit diseases spread locally. Most farms spray entire fields anyway.
+Instead of simply detecting fruit, the system analyzes **spatial clusters of damaged apples** to estimate where intervention is actually needed.
 
-This pipeline detects apple health from drone imagery and estimates which clusters actually need treatment — built with Roboflow Workflows, originally developed as my graduation project.
-
-## Background
-
-This project originated as my control and automation engineering graduation thesis: a precision agriculture system designed to detect crop health patterns from aerial imagery.
-
-The original system included:
-
-- YOLOv4 trained on custom datasets
-- multi-objective crop grading based on disease, maturity, and water signals
-- optimization algorithms (Genetic Algorithm + Big Bang–Big Crunch)
-- MATLAB-based decision modeling
-- MQTT infrastructure for field data communication
-
-While the system worked, building the full pipeline required significant engineering overhead: dataset collection, labeling infrastructure, training pipelines, and large-image inference orchestration.
-
-This repository rebuilds the vision layer using Roboflow Workflows to evaluate how modern developer tooling reduces that complexity.
-
-So I rebuilt the core of it.
+This project rebuilds part of my **Control and Automation Engineering graduation thesis** using **Roboflow Workflows** to explore how modern tooling simplifies real-world computer vision pipelines.
 
 ---
 
-## The Problem
+# 🚀 Quick Overview
 
-Traditional orchard management treats fields uniformly. But disease doesn't spread uniformly — it starts in clusters and expands outward. Spraying everything wastes resources and ignores the actual infection pattern.
+The pipeline converts raw drone imagery into **decision-oriented signals for orchard management**.
 
-A vision system that maps *where* the problem is changes the decision from "spray the field" to "spray these zones."
-
----
-
-## Pipeline
 ```
-Aerial Image
-    → Image Slicing              (handle high-res drone footage)
-    → Object Detection           (custom model trained on Roboflow)
-    → Detection Stitching        (merge outputs across slices)
-    → Cluster Analysis           (group nearby detections spatially)
-    → Treatment Zone Map         (localized, actionable output)
+Drone Image
+     ↓
+Object Detection (apple / damaged_apple)
+     ↓
+Detection Stitching
+     ↓
+Spatial Clustering
+     ↓
+Treatment Zone Estimation
 ```
 
+### Example Pipeline Result
+
+| Input Image | Detection | Treatment Zones |
+|-------------|-----------|-----------------|
+| ![](assets/images/field.png) | ![](assets/images/detection.jpeg) | ![](assets/images/damaged_zone120.jpeg) |
+
+The final output highlights **areas where disease signals cluster**, enabling **targeted spraying instead of uniform field treatment**.
+
 ---
 
-## Model
+# 🌱 The Problem
 
-Custom object detection model trained from scratch using Roboflow.
+Fruit diseases rarely spread uniformly across orchards.
+
+They usually begin in **small localized clusters** before spreading outward.
+
+However, many orchards still rely on **uniform spraying**, treating entire fields regardless of where infection actually exists.
+
+This approach:
+
+- wastes chemicals
+- increases operational costs
+- ignores spatial disease patterns
+
+A vision system that maps **where disease signals concentrate** changes the decision from:
+
+```
+spray the entire field
+```
+
+to
+
+```
+spray these zones
+```
+
+---
+
+# 🤖 Model
+
+Custom object detection model trained using **Roboflow**.
 
 | Class | Description |
-|-------|-------------|
-| `apple` | Healthy fruit |
-| `rotten_apple` | Diseased fruit |
+|------|-------------|
+| **apple** | healthy fruit |
+| **damaged_apple** | diseased fruit |
 
-> **Note:** Apple vs. rotten apple classification is used here as a fast proxy to validate the pipeline end-to-end.
-> In real agricultural deployments, disease detection typically focuses on leaf-level pathology, where models learn from crop-specific morphology and disease patterns. These signals provide more actionable indicators for intervention decisions.  
-> The current model intentionally simplifies the biological signal in order to test the vision pipeline itself before investing in more specialized dataset collection.
+Apple vs damaged apple classification is used as a **proxy signal** to validate the spatial reasoning pipeline.
 
-## Example Output
-
-The system processes a high-resolution aerial image of an orchard and transforms raw visual data into spatial treatment signals.
-
-Instead of simply detecting objects, the pipeline aggregates detections and analyzes their spatial proximity to estimate localized clusters of disease signals.
-
-The output therefore moves beyond detection and produces a **decision-oriented map** that highlights areas of the orchard more likely to require intervention.
-
-Pipeline output stages:
-
-Drone Image  
-→ Apple / Rotten Apple Detection  
-→ Spatial Cluster Analysis  
-→ Estimated Treatment Zones
-
-The result is a simplified decision layer for orchard management — showing *where attention should be focused* rather than treating the entire field uniformly.
-
-
-
-## Spatial Clustering Logic
-
-Object detection alone does not directly answer the operational question:  
-**where should treatment be applied?**
-
-Individual detections only indicate isolated signals. In real agricultural environments, however, disease presence is meaningful when detections begin to appear **spatially grouped**.
-
-To address this, the pipeline performs a spatial clustering step after detection stitching.
-
-Bounding box coordinates from all detections are analyzed to identify groups of nearby detections that likely represent localized infection zones.
-
-The clustering process follows three steps:
-
-1. **Detection Stitching**  
-   Predictions generated from sliced inference are merged back into the original image coordinate space.
-
-2. **Spatial Proximity Analysis**  
-   Bounding box centers are compared using Euclidean distance to determine spatial relationships between detections.
-
-3. **Cluster Formation**  
-   Nearby detections are grouped into clusters representing potential disease zones.
-
-Instead of producing hundreds of independent detections, the system produces a smaller number of **interpretable treatment regions**.
-
-This transforms the model output from a detection task into a **decision-support signal** that can guide localized spraying or inspection.
-
-
-## What Roboflow Simplified
-
-The original thesis pipeline required months of setup before a single 
-inference could run — labeling infrastructure, training configuration, 
-model versioning, large-image orchestration. Each layer had its own 
-engineering overhead before the actual problem could be addressed.
-
-With Roboflow, the model went from dataset to inference in hours.  
-More importantly, the workflow builder allowed the full pipeline — 
-slicing, detection, stitching, custom processing — to be assembled 
-visually rather than wired together manually.
-
-The result was a shift in where development time actually went: less 
-on infrastructure, more on what the outputs mean and how they should 
-be interpreted.
+In real agricultural deployments, disease detection often focuses on **leaf pathology and plant morphology**, but fruit-level signals allow rapid validation of the full vision system.
 
 ---
 
-## Developer Observations
+# 🔎 Detection Output
 
-These are honest friction points encountered during development — not 
-complaints, but the kind of feedback that comes from actually building 
-on top of a platform.
+The model detects apples and damaged apples across aerial orchard imagery.
 
-**Python block constraints.**  
-Custom Python blocks are the right mechanism for logic that doesn't 
-fit the visual workflow — but the execution environment is restrictive. 
-Limited dependencies, opaque errors, and publishing failures when 
-runtime errors occur made iteration slower than expected. Better 
-runtime feedback would meaningfully improve this.
+![Detection Output](assets/images/detection.jpeg)
 
-**Slice stitching is a black box.**  
-For large aerial images, sliced inference is necessary — but reasoning 
-about how detections from adjacent slices are reconciled is difficult. 
-When detections conflicted at slice boundaries, there was no clear way 
-to inspect or adjust the stitching behavior. Intermediate output 
-visibility at this stage would help significantly.
-
-**Grid-based output isn't native.**  
-The natural output format for precision agriculture isn't clustered 
-polygons — it's a field grid with per-cell recommendations. Getting 
-from detection clusters to actionable grid coordinates required custom 
-logic entirely outside the Workflow environment. For agriculture 
-deployments specifically, this is a meaningful gap.
+These detections form the **base signals used for clustering and treatment zone estimation**.
 
 ---
 
-## Conclusion
+# 📍 Spatial Cluster Analysis
 
-The thesis system worked. Building it revealed how much engineering 
-effort goes into problems that aren't the core problem.
+Object detection alone does **not answer the operational question:**
 
-Roboflow removes most of that overhead. Dataset preparation, model 
-training, and basic pipeline orchestration are no longer the hard 
-parts. The hard parts — spatial reasoning, decision logic, bridging 
-model output to field action — still require custom work. That 
-boundary is now much further along the pipeline than it used to be.
+> **Where should treatment be applied?**
 
-That's a meaningful shift.
+Individual detections represent isolated signals. In agricultural environments, disease presence becomes meaningful when detections appear **spatially grouped**.
+
+The pipeline therefore performs **spatial clustering on bounding box coordinates**.
+
+### Clustering Process
+
+1️⃣ **Detection Stitching**  
+Predictions from sliced inference are mapped back into the original image coordinate space.
+
+2️⃣ **Spatial Proximity Analysis**  
+Bounding box centers are compared using **Euclidean distance**.
+
+3️⃣ **Cluster Formation**  
+Nearby detections are merged into **treatment zones**.
+
+---
+
+# 📊 Merge Threshold Comparison
+
+Different clustering thresholds were evaluated to understand how spatial grouping affects treatment zone estimation.
+
+### 80px merge
+
+![](assets/images/zone80.jpeg)
+
+### 120px merge
+
+![](assets/images/zone120.jpeg)
+
+### 180px merge
+
+![](assets/images/zone180.jpeg)
+
+### 240px merge
+
+![](assets/images/zone240.jpeg)
+
+---
+
+# ✅ Optimal Treatment Zones
+
+A merge threshold of **120 pixels** produced the most interpretable treatment regions.
+
+This threshold balances two competing effects:
+
+- small thresholds fragment clusters into many tiny zones  
+- large thresholds merge distant detections into overly large regions  
+
+The **120px merge distance** produced the clearest spatial grouping of damaged apples.
+
+![Optimal Zones](assets/images/damaged_zone120.jpeg)
+
+These zones represent areas **most likely to require intervention**.
+
+---
+
+# 🔥 Disease Density Heatmap
+
+In addition to clustering, the pipeline generates a **spatial heatmap** showing where damaged apple detections accumulate.
+
+![Heatmap](assets/images/heatmap-rotten.jpeg)
+
+This visualization highlights **disease intensity across the orchard**.
+
+---
+
+# 📈 Quantitative Signals
+
+Beyond visual outputs, the workflow extracts simple quantitative indicators describing orchard health.
+
+### 1️⃣ Infection Ratio
+
+```
+damaged_apple / total_apple
+```
+
+Represents the **proportion of detected fruit that appears damaged**.
+
+---
+
+### 2️⃣ Disease Density Coverage
+
+```
+damaged_heatmap_area / total_field_area
+```
+
+Measures how much of the orchard contains **measurable disease density**.
+
+---
+
+### 3️⃣ Treatment Zone Coverage
+
+```
+merged_damaged_zone_area / total_field_area
+```
+
+Using the **120px merge threshold**, this metric estimates how much of the orchard **may require targeted intervention**.
+
+Together these signals transform raw detections into **decision-oriented indicators for orchard management**.
+
+---
+
+# ⚙️ Roboflow Workflow Architecture
+
+![Workflow](assets/images/workflow-diagram.png)
+
+Key stages include:
+
+- image slicing for large aerial imagery  
+- object detection inference  
+- detection stitching  
+- spatial clustering via custom Python blocks  
+- heatmap generation  
+- quantitative signal extraction  
+
+The workflow produces both **visual outputs** and **structured signals** describing orchard conditions.
+
+---
+
+# 🎓 Background
+
+This project originated as my **Control and Automation Engineering graduation thesis** focused on **precision agriculture systems**.
+
+The original research pipeline included:
+
+- **YOLOv4 models** trained on agricultural datasets  
+- **multi-objective crop grading** based on disease and maturity signals  
+- **optimization algorithms** (Genetic Algorithm + Big Bang–Big Crunch)  
+- **MATLAB-based decision modeling**  
+- **MQTT infrastructure** for transmitting field data  
+
+While the system worked, building the full pipeline required significant engineering overhead.
+
+Most development time was spent on:
+
+- dataset collection and labeling
+- training pipeline configuration
+- large-image inference orchestration
+- model infrastructure
+
+Rather than focusing on the **actual decision logic**.
+
+This repository rebuilds the **vision layer using Roboflow Workflows** to evaluate how modern tooling reduces that overhead and allows development effort to focus on:
+
+> **turning model outputs into actionable agricultural decisions**
